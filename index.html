@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WhatsApp Recovery Center</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:20px;min-height:100vh;
+ display:flex;align-items:center;justify-content:center;
+ background:#07140e;color:white;
+ font-family:Arial,sans-serif
+}
+.card{
+ width:100%;max-width:440px;padding:25px;
+ background:#10241b;border:1px solid #24563c;
+ border-radius:20px;box-shadow:0 15px 40px #0008
+}
+.logo{
+ margin:auto;width:65px;height:65px;
+ display:grid;place-items:center;
+ border-radius:50%;background:#087e50;font-size:32px
+}
+h2{text-align:center}
+.sub{text-align:center;color:#a8c4b6;font-size:13px}
+label{display:block;margin:22px 0 9px;font-weight:bold;font-size:14px}
+input,select{
+ width:100%;padding:15px;border-radius:10px;
+ background:#081810;color:white;border:1px solid #315a43
+}
+button{
+ width:100%;padding:15px;margin-top:22px;
+ border:0;border-radius:10px;background:#087e50;
+ color:white;font-weight:bold;cursor:pointer
+}
+button:disabled{opacity:.5}
+#status{
+ display:none;margin-top:18px;padding:14px;
+ border-radius:10px;background:#081810;
+ font-size:13px;line-height:1.5
+}
+small{display:block;text-align:center;color:#91ac9c;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="logo">☎</div>
+<h2>WhatsApp Recovery</h2>
+<p class="sub">Account Problem Resolution Center</p>
+
+<form id="form">
+<label>Nomor WhatsApp</label>
+<input id="phone" type="tel" placeholder="+8562055757488" required>
+
+<label>Masalah akun</label>
+<select id="problem" required>
+<option value="">-- Pilih masalah --</option>
+<option value="permanent">Akun terblokir permanen</option>
+<option value="temporary">Akun terblokir sementara</option>
+<option value="login">Login tidak tersedia</option>
+</select>
+
+<button id="submit" type="submit">KIRIM PENGADUAN</button>
+</form>
+
+<div id="status"></div>
+<small>Official Account Support Request Generator</small>
+</div>
+
+<script>
+const form=document.getElementById("form");
+const statusBox=document.getElementById("status");
+const btn=document.getElementById("submit");
+
+form.addEventListener("submit",async e=>{
+ e.preventDefault();
+
+ const phone=document.getElementById("phone").value.trim();
+ const problem=document.getElementById("problem").value;
+
+ if(!/^\+[0-9]{7,15}$/.test(phone)){
+  alert("Masukkan nomor dengan kode negara. Contoh +8562055757488");
+  return;
+ }
+
+ btn.disabled=true;
+ btn.textContent="MEMPROSES...";
+ statusBox.style.display="block";
+ statusBox.textContent="Sedang mengirim pengaduan...";
+
+ try{
+  const response=await fetch("/api/send",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({phone,problem})
+  });
+
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error||"Pengiriman gagal");
+
+  statusBox.textContent="Permintaan diterima oleh layanan email. ID: "+data.id;
+  form.reset();
+
+ }catch(err){
+  statusBox.textContent="Gagal: "+err.message;
+ }finally{
+  btn.disabled=false;
+  btn.textContent="KIRIM PENGADUAN";
+ }
+});
+</script>
+</body>
+</html>
